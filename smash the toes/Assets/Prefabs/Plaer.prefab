@@ -55,7 +55,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   animator: {fileID: 4222259406008177363}
   playerInput: {fileID: 368026324700789371}
-  rb: {fileID: 0}
+  rb: {fileID: 2929902684854330633}
   speed: 10
   currJumpForce: 0
   stoppedTime: 0
@@ -76,6 +76,7 @@ MonoBehaviour:
   runSpeed: 14
   duration: 0.33
   bufferTime: 0.2
+  checkGround: {fileID: 6770855869907409590}
   checkSphereTransform: {fileID: 960536992310218088}
   isGrounded: 0
   wasGrounded: 0

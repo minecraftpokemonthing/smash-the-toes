@@ -9,6 +9,9 @@ public class PlayerLocomotion : MonoBehaviour
 {
     public Animator animator;
 
+    InputAction jump;
+    InputAction fallThroughPlatform;
+
     public PlayerInput playerInput;
     public Rigidbody2D rb;
 
@@ -34,6 +37,14 @@ public class PlayerLocomotion : MonoBehaviour
     public float runSpeed = 14f;
     public float duration = .33f;
     public float bufferTime = .2f;
+    float moveInput;
+    float runElapsed;
+    float stopElapsed;
+    float runT;
+    float stopT;
+    float t;
+
+    public CheckGround checkGround;
 
     public Transform checkSphereTransform;
 
@@ -55,6 +66,8 @@ public class PlayerLocomotion : MonoBehaviour
     public Collider2D currPlatform;
 
     public Vector2 hitVector;
+    Vector2 vel;
+    Vector2 startVel;
 
     public LayerMask ground;
     public LayerMask platfrm;
@@ -63,8 +76,9 @@ public class PlayerLocomotion : MonoBehaviour
     void Start()
     {
         currJumps = maxJumps;
-        rb = GetComponent<Rigidbody2D>();
         initSpeed = speed;
+        jump = playerInput.actions["Jump"];
+        fallThroughPlatform = playerInput.actions["FallThroughPlatform"];
     }
 
     // Update is called once per frame
@@ -72,7 +86,7 @@ public class PlayerLocomotion : MonoBehaviour
     {
         platform = Physics2D.Raycast(transform.position, Vector2.up, 1.1f, LayerMask.GetMask("Platform"));
 
-        var moveInput = playerInput.actions["Move"].ReadValue<float>();
+        moveInput = playerInput.actions["Move"].ReadValue<float>();
 
         if (Mathf.Abs(moveInput) > 0.01f)
         {
@@ -110,7 +124,7 @@ public class PlayerLocomotion : MonoBehaviour
             animator.SetBool("IsGrounded", false);
         }
 
-        if (playerInput.actions["Jump"].triggered)
+        if (jump.triggered)
         {
             isJumping = true;
             jumpTimer = 0;
@@ -126,7 +140,7 @@ public class PlayerLocomotion : MonoBehaviour
             }
         }
 
-        if (playerInput.actions["Jump"].IsPressed() && checkSphereTransform.GetComponent<CheckGround>().offGroundButCanJump || playerInput.actions["Jump"].triggered && checkSphereTransform.GetComponent<CheckGround>().offGroundButCanJump)
+        if (jump.IsPressed() && checkGround.offGroundButCanJump || playerInput.actions["Jump"].triggered && checkGround.offGroundButCanJump)
         {
             Jump(secondJumpForce);
         }
@@ -139,7 +153,7 @@ public class PlayerLocomotion : MonoBehaviour
         else if (rb.velocity.y == 0 && isGrounded && playerInput.actions["Jump"].WasPressedThisFrame())
             canContiueTimer = true;
 
-        if (playerInput.actions["Jump"].IsPressed())
+        if (jump.IsPressed())
         {
             if (jumpTimer <= jumpSquatTime + .1f && canContiueTimer)
             {
@@ -167,7 +181,7 @@ public class PlayerLocomotion : MonoBehaviour
             transform.localScale = new Vector2(-1, 1);
         }
 
-        if (playerInput.actions["Jump"].WasReleasedThisFrame() && canContiueTimer)
+        if (jump.WasReleasedThisFrame() && canContiueTimer)
         {
             jumpTimer = 0;
 
@@ -204,7 +218,7 @@ public class PlayerLocomotion : MonoBehaviour
             Jump(smallJump);
         }
 
-        if (currPlatform && playerInput.actions["FallThroughPlatform"].triggered && isGrounded)
+        if (currPlatform && fallThroughPlatform.triggered && isGrounded)
         {
             StartCoroutine(DisablePlatformCollision());
         }
@@ -219,27 +233,27 @@ public class PlayerLocomotion : MonoBehaviour
 
         if (!isGrounded)
         {
-            Vector2 vel = rb.velocity;
+            vel = rb.velocity;
             vel.y -= bonusGrav * Time.deltaTime;
 
             rb.velocity = vel;
         }
 
-        if (playerInput.actions["Move"].ReadValue<float>() > .5f || playerInput.actions["Move"].ReadValue<float>() < -.5f)
+        if (moveInput > .5f || moveInput < -.5f)
         {
-            float elapsed = 0;
-            elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            speed = Mathf.Lerp(speed, runSpeed, t);
+            runElapsed = 0;
+            runElapsed += Time.deltaTime;
+            runT = runElapsed / duration;
+            speed = Mathf.Lerp(speed, runSpeed, runT);
 
             if (runSpeed - speed < .2f)
                 speed = runSpeed;
         } else
         {
-            float elapsed = 0;
-            elapsed += Time.deltaTime;
-            float t = elapsed / duration;
-            speed = Mathf.Lerp(speed, initSpeed, t);
+            stopElapsed = 0;
+            stopElapsed += Time.deltaTime;
+            stopT = stopElapsed / duration;
+            speed = Mathf.Lerp(speed, initSpeed, stopT);
 
             if (speed - initSpeed < .2f)
                 speed = initSpeed;
@@ -259,9 +273,7 @@ public class PlayerLocomotion : MonoBehaviour
         if (jumpForce == bigJump)
             StartCoroutine(nameof(JumpSquat));
 
-        var jumpY = rb.velocity.y;
-        jumpY = jumpForce;
-        rb.velocity = new Vector2(rb.velocity.x, jumpY);
+        rb.velocity = new Vector2(rb.velocity.x, jumpForce);
 
         if (jumpForce == secondJumpForce && rb.velocity.y < 0)
         {
@@ -279,7 +291,7 @@ public class PlayerLocomotion : MonoBehaviour
     private void FixedUpdate()
     {
         if (!wasHit)
-            rb.velocity = new Vector2(playerInput.actions["Move"].ReadValue<float>() * speed, rb.velocity.y);
+            rb.velocity = new Vector2(moveInput * speed, rb.velocity.y);
     }
 
     public void ApplyKnockback(Vector2 knockback)
@@ -298,8 +310,8 @@ public class PlayerLocomotion : MonoBehaviour
             rb.velocity = new Vector2(rb.velocity.x, 0);
         }
         */
-        float t = 0f;
-        Vector2 startVel = rb.velocity;
+        t = 0f;
+        startVel = rb.velocity;
 
         while (t < 1f)
         {

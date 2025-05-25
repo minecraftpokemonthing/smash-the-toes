@@ -6,10 +6,19 @@ using UnityEngine;
 public class DetectHit : MonoBehaviour
 {
     PlayerLocomotion playerLocomotion;
+    PlayerLocomotion playerHitLocomotion;
+    public InitializeHitbox initializeHitbox;
+    SetPercentageText playerHitPercentageText;
     Attack attack;
 
     public float knockbackFormula;
     public float decayRate = 3f;
+
+    Rigidbody2D playerHitRigidbody;
+
+    GameObject playerHit;
+
+    Vector2 dir;
 
     private void Start()
     {
@@ -23,28 +32,31 @@ public class DetectHit : MonoBehaviour
         {
             Debug.Log(collision.name);
 
-            var playerHit = collision.transform.gameObject;
-            var playerHitRigidbody = playerHit.GetComponent<Rigidbody2D>();
+            playerHit = collision.transform.gameObject;
+            playerHitRigidbody = playerHit.GetComponent<Rigidbody2D>();
 
-            var dir = playerLocomotion.facingRight ? Vector2.right : Vector2.left;
+            dir = playerLocomotion.facingRight ? Vector2.right : Vector2.left;
 
-            playerHit.GetComponent<PlayerLocomotion>().percentage += this.transform.parent.GetComponent<Attack>().finalDamage;
+            playerHitLocomotion = playerHit.GetComponent<PlayerLocomotion>();
+            playerHitPercentageText = playerHit.GetComponent<SetPercentageText>();
 
-            knockbackFormula = (playerHit.GetComponent<PlayerLocomotion>().percentage / 10)  +
-                ((playerHit.GetComponent<PlayerLocomotion>().percentage * this.transform.parent.GetComponent<Attack>().finalDamage) / 20)
-                * (playerHit.GetComponent<PlayerLocomotion>().weight)
+            playerHitLocomotion.percentage += attack.finalDamage;
+
+            knockbackFormula = (playerHitLocomotion.percentage / 10)  +
+                ((playerHitLocomotion.percentage * attack.finalDamage) / 20)
+                * (playerHitLocomotion.weight)
                 * (1.4f)
-                + (18f) * (this.GetComponent<InitializeHitbox>().knockbackScaling)
-                + this.GetComponent<InitializeHitbox>().baseKnockback;
+                + (18f) * (initializeHitbox.knockbackScaling)
+                + initializeHitbox.baseKnockback;
 
             Debug.Log(playerHitRigidbody);
 
             //playerHitRigidbody.velocity = knockbackFormula * dir;
-            playerHit.GetComponent<PlayerLocomotion>().wasHit = true;
-            playerHit.GetComponent<PlayerLocomotion>().hitVector = knockbackFormula * dir;
+            playerHitLocomotion.wasHit = true;
+            playerHitLocomotion.hitVector = knockbackFormula * dir;
 
-            playerHit.GetComponent<PlayerLocomotion>().ApplyKnockback((knockbackFormula * dir) / 90);
-            playerHit.GetComponent<SetPercentageText>().TookDamage();
+            playerHitLocomotion.ApplyKnockback((knockbackFormula * dir) / 90);
+            playerHitPercentageText.TookDamage();
         }
     }
 }

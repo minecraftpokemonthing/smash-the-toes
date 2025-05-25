@@ -97,9 +97,12 @@ MonoBehaviour:
   damage: 0
   baseKnockback: 0
   knockbackScaling: 0
+  cooldown: 0
+  startUp: 0
   hitboxSize: {x: 0, y: 0}
   offset: {x: 0, y: 0}
   hitboxPrefab: {fileID: 0}
+  collider: {fileID: 8456607460744267702}
 --- !u!50 &2303978336959409212
 Rigidbody2D:
   serializedVersion: 4
@@ -139,6 +142,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a8e39fc01528f431ca66c3575340a3f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  initializeHitbox: {fileID: 5412796713311474606}
   knockbackFormula: 0
   decayRate: 3
 --- !u!1 &9008565676387136743

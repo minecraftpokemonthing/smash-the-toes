@@ -13,6 +13,7 @@ public class InitializeHitbox : MonoBehaviour
     public Vector2 hitboxSize;
     public Vector2 offset;
     public GameObject hitboxPrefab;
+    public BoxCollider2D collider;
 
     public void Initialize(AttackData attackData)
     {
@@ -24,7 +25,7 @@ public class InitializeHitbox : MonoBehaviour
         this.cooldown = attackData.cooldown;
         this.startUp = attackData.startUp;
         this.offset = attackData.offset;
-        GetComponent<BoxCollider2D>().size = Vector2.one;
+        collider.size = Vector2.one;
         transform.localScale = hitboxSize;
     }
 }

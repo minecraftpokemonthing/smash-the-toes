@@ -18,6 +18,13 @@ public class Attack : MonoBehaviour
     const int maxQueueSize = 9;
     PlayerLocomotion playerLocomotion;
     public GameObject exclamationMark;
+    float moveInput;
+    Vector3 hitboxPos;
+    GameObject hitbox;
+    int lastIndex;
+    int distanceFromEnd;
+    float[] multipliers;
+    InitializeHitbox initializeHitbox;
 
     // Start is called before the first frame update
     void Start()
@@ -29,7 +36,7 @@ public class Attack : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float moveInput = playerInput.actions["Move"].ReadValue<float>();
+        moveInput = playerInput.actions["Move"].ReadValue<float>();
 
         if (Mathf.Abs(moveInput) > 0)
         {
@@ -63,12 +70,12 @@ public class Attack : MonoBehaviour
 
             yield return new WaitForSeconds(currAttack.hitboxPrefab.GetComponent<InitializeHitbox>().startUp);
 
-            Vector3 hitboxPos = new Vector3(
+            hitboxPos = new Vector3(
             (facingRight ? 1 : -1) * currAttack.offset.x,
             currAttack.offset.y,
             0);
 
-            var hitbox = Instantiate(currAttack.hitboxPrefab, transform.position + hitboxPos, Quaternion.identity, this.transform);
+            hitbox = Instantiate(currAttack.hitboxPrefab, transform.position + hitboxPos, Quaternion.identity, this.transform);
 
             animator.SetTrigger("Attack");
 
@@ -77,7 +84,9 @@ public class Attack : MonoBehaviour
                 exclamationMark.SetActive(true);
             }
 
-            hitbox.GetComponent<InitializeHitbox>().Initialize(currAttack);
+            initializeHitbox = hitbox.GetComponent<InitializeHitbox>();
+
+            initializeHitbox.Initialize(currAttack);
             finalDamage = currAttack.damage * GetStaleMultiplier(currAttack);
             staleQueue.Add(currAttack);
 
@@ -91,7 +100,7 @@ public class Attack : MonoBehaviour
             Destroy(hitbox);
             exclamationMark.SetActive(false);
 
-            yield return new WaitForSeconds(hitbox.GetComponent<InitializeHitbox>().cooldown);
+            yield return new WaitForSeconds(initializeHitbox.cooldown);
 
             canAttack = true;
 
@@ -101,7 +110,7 @@ public class Attack : MonoBehaviour
 
     public float GetStaleMultiplier(AttackData move)
     {
-        int lastIndex = staleQueue.FindLastIndex(x => x == move);
+        lastIndex = staleQueue.FindLastIndex(x => x == move);
 
         if (lastIndex == -1)
         {
@@ -109,9 +118,9 @@ public class Attack : MonoBehaviour
             return 1f;
         }
 
-        var distanceFromEnd = staleQueue.Count - 1 - lastIndex;
+        distanceFromEnd = staleQueue.Count - 1 - lastIndex;
 
-        float[] multipliers =
+        multipliers = new float[]
         {
          0.52f, 0.58f, 0.64f, 0.70f, 0.76f, 0.82f, 0.88f, 0.94f, 1.00f
         };
