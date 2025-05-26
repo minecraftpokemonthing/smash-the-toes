@@ -9,6 +9,9 @@ public class PlayerLocomotion : MonoBehaviour
 {
     public Animator animator;
 
+    public Transform spawnPoint;
+    public Transform deadPoint;
+
     InputAction jump;
     InputAction fallThroughPlatform;
 
@@ -79,6 +82,10 @@ public class PlayerLocomotion : MonoBehaviour
         initSpeed = speed;
         jump = playerInput.actions["Jump"];
         fallThroughPlatform = playerInput.actions["FallThroughPlatform"];
+        spawnPoint = GameObject.Find("SpawnPoint").transform;
+        deadPoint = GameObject.Find("DeadZone").transform;
+
+        transform.position = spawnPoint.position;
     }
 
     // Update is called once per frame
@@ -87,6 +94,12 @@ public class PlayerLocomotion : MonoBehaviour
         platform = Physics2D.Raycast(transform.position, Vector2.up, 1.1f, LayerMask.GetMask("Platform"));
 
         moveInput = playerInput.actions["Move"].ReadValue<float>();
+
+        if (transform.position.y < deadPoint.position.y)
+        {
+            rb.velocity = new Vector2(rb.velocity.x, 0);
+            transform.position = spawnPoint.position;
+        }
 
         if (Mathf.Abs(moveInput) > 0.01f)
         {

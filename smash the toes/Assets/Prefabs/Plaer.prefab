@@ -202,7 +202,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   playerInput: {fileID: 368026324700789371}
   jab: {fileID: 11400000, guid: 76893d3f3440a4e16af6c05790029108, type: 2}
-  neutralSpecial: {fileID: 11400000, guid: ca7b5e0c271564536868eccda52ead1e, type: 2}
+  neutralSpecial: {fileID: 11400000, guid: 96caf7413252046339c93fb619efdfaf, type: 2}
   animator: {fileID: 4222259406008177363}
   facingRight: 0
   finalDamage: 0

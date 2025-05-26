@@ -18,6 +18,8 @@ public class FollowPlayer : MonoBehaviour
 
     public void OnPlayerJoined(PlayerInput input)
     {
+        if (numPlayers == 0)
+            player = input.transform;
         numPlayers++;
         Debug.Log("New player joined: " + input.name); // 👈 Add this
         if (numPlayers > 1)
@@ -27,6 +29,9 @@ public class FollowPlayer : MonoBehaviour
 
     private void Update()
     {
+        if (!newPlayer)
+            return;
+
         if (hasMultiplePlayers)
             GetComponent<Camera>().orthographicSize = (newPlayer.position - player.position).magnitude + offset;
 
@@ -35,6 +40,9 @@ public class FollowPlayer : MonoBehaviour
 
     private void LateUpdate()
     {
+        if (!player)
+            return;
+
         if (!hasMultiplePlayers)
         {
             targetPosition = player.position;

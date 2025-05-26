@@ -10,9 +10,11 @@ public class DetectHit : MonoBehaviour
     public InitializeHitbox initializeHitbox;
     SetPercentageText playerHitPercentageText;
     Attack attack;
+    public AttackData attackData;
 
     public float knockbackFormula;
     public float decayRate = 3f;
+    public float finalDamage;
 
     Rigidbody2D playerHitRigidbody;
 
@@ -22,8 +24,8 @@ public class DetectHit : MonoBehaviour
 
     private void Start()
     {
-        attack = transform.parent.GetComponent<Attack>();
-        playerLocomotion = transform.parent.GetComponent<PlayerLocomotion>();
+        attack = transform.GetComponentInParent<Attack>();
+        playerLocomotion = transform.GetComponentInParent<PlayerLocomotion>();
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -37,17 +39,19 @@ public class DetectHit : MonoBehaviour
 
             dir = playerLocomotion.facingRight ? Vector2.right : Vector2.left;
 
+            finalDamage = attackData.damage; //* attack.GetStaleMultiplier(attack.currAttack);
+
             playerHitLocomotion = playerHit.GetComponent<PlayerLocomotion>();
             playerHitPercentageText = playerHit.GetComponent<SetPercentageText>();
 
-            playerHitLocomotion.percentage += attack.finalDamage;
+            playerHitLocomotion.percentage += finalDamage;
 
             knockbackFormula = (playerHitLocomotion.percentage / 10)  +
-                ((playerHitLocomotion.percentage * attack.finalDamage) / 20)
+                ((playerHitLocomotion.percentage * finalDamage) / 20)
                 * (playerHitLocomotion.weight)
                 * (1.4f)
-                + (18f) * (initializeHitbox.knockbackScaling)
-                + initializeHitbox.baseKnockback;
+                + (18f) * (attackData.knockbackScaling)
+                + attackData.baseKnockback;
 
             Debug.Log(playerHitRigidbody);
 
@@ -56,7 +60,7 @@ public class DetectHit : MonoBehaviour
             playerHitLocomotion.hitVector = knockbackFormula * dir;
 
             playerHitLocomotion.ApplyKnockback((knockbackFormula * dir) / 90);
-            playerHitPercentageText.TookDamage();
+            playerHit.GetComponent<SetPercentageText>().TookDamage();
         }
     }
 }

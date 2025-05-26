@@ -10,7 +10,7 @@ public class Attack : MonoBehaviour
     public AttackData jab;
     public AttackData neutralSpecial;
     public Animator animator;
-    AttackData currAttack;
+    public AttackData currAttack;
     public bool facingRight;
     bool canAttack = true;
     public float finalDamage;
@@ -87,7 +87,7 @@ public class Attack : MonoBehaviour
             initializeHitbox = hitbox.GetComponent<InitializeHitbox>();
 
             initializeHitbox.Initialize(currAttack);
-            finalDamage = currAttack.damage * GetStaleMultiplier(currAttack);
+
             staleQueue.Add(currAttack);
 
             if (staleQueue.Count > maxQueueSize)

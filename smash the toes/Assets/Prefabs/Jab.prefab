@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 2303978336959409212}
   - component: {fileID: -5854006284156599187}
   m_Layer: 0
-  m_Name: Hitbox
+  m_Name: Jab
   m_TagString: Hitbox
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -103,6 +103,7 @@ MonoBehaviour:
   offset: {x: 0, y: 0}
   hitboxPrefab: {fileID: 0}
   collider: {fileID: 8456607460744267702}
+  attackData: {fileID: 0}
 --- !u!50 &2303978336959409212
 Rigidbody2D:
   serializedVersion: 4
@@ -143,8 +144,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   initializeHitbox: {fileID: 5412796713311474606}
+  attackData: {fileID: 11400000, guid: 76893d3f3440a4e16af6c05790029108, type: 2}
   knockbackFormula: 0
   decayRate: 3
+  finalDamage: 0
 --- !u!1 &9008565676387136743
 GameObject:
   m_ObjectHideFlags: 0
