@@ -14,22 +14,16 @@ public class Attack : MonoBehaviour
     public bool facingRight;
     bool canAttack = true;
     public float finalDamage;
-    public List<AttackData> staleQueue = new List<AttackData>();
-    const int maxQueueSize = 9;
     PlayerLocomotion playerLocomotion;
     public GameObject exclamationMark;
     float moveInput;
     Vector3 hitboxPos;
     GameObject hitbox;
-    int lastIndex;
-    int distanceFromEnd;
-    float[] multipliers;
     InitializeHitbox initializeHitbox;
 
     // Start is called before the first frame update
     void Start()
     {
-        staleQueue.Clear();
         playerLocomotion = GetComponent<PlayerLocomotion>();
     }
 
@@ -88,13 +82,6 @@ public class Attack : MonoBehaviour
 
             initializeHitbox.Initialize(currAttack);
 
-            staleQueue.Add(currAttack);
-
-            if (staleQueue.Count > maxQueueSize)
-                staleQueue.RemoveAt(0);
-
-            Debug.Log(finalDamage);
-
             yield return new WaitForSeconds(currAttack.activeTime);
 
             Destroy(hitbox);
@@ -106,33 +93,5 @@ public class Attack : MonoBehaviour
 
             playerLocomotion.speed = playerLocomotion.initSpeed;
         }
-    }
-
-    public float GetStaleMultiplier(AttackData move)
-    {
-        lastIndex = staleQueue.FindLastIndex(x => x == move);
-
-        if (lastIndex == -1)
-        {
-            Debug.Log("Move not found in stale queue — using fresh multiplier (1.0)");
-            return 1f;
-        }
-
-        distanceFromEnd = staleQueue.Count - 1 - lastIndex;
-
-        multipliers = new float[]
-        {
-         0.52f, 0.58f, 0.64f, 0.70f, 0.76f, 0.82f, 0.88f, 0.94f, 1.00f
-        };
-
-        distanceFromEnd = Mathf.Clamp(distanceFromEnd, 0, multipliers.Length - 1);
-
-        Debug.Log($"Stale queue contents:");
-        for (int i = 0; i < staleQueue.Count; i++)
-            Debug.Log($"{i}: {staleQueue[i].name}");
-
-        Debug.Log($"Current move: {move.name}, Distance from end: {distanceFromEnd}, Multiplier: {multipliers[distanceFromEnd]}");
-
-        return multipliers[distanceFromEnd];
     }
 }

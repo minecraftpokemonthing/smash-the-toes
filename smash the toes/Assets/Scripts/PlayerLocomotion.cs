@@ -51,13 +51,14 @@ public class PlayerLocomotion : MonoBehaviour
 
     public Transform checkSphereTransform;
 
-    bool isJumping;
+    public bool isJumping;
     public bool isGrounded;
     public bool wasGrounded;
     public bool timeToBigJump;
     public bool facingRight;
     public bool timeToSmallJump;
     public bool wasHit;
+    public bool shortHopping;
     public bool onPlatform;
     public bool currPlatformShouldBeEnabled;
     bool dropDownPlatform;
@@ -99,6 +100,7 @@ public class PlayerLocomotion : MonoBehaviour
         {
             rb.velocity = new Vector2(rb.velocity.x, 0);
             transform.position = spawnPoint.position;
+            percentage = 0;
         }
 
         if (Mathf.Abs(moveInput) > 0.01f)
@@ -130,6 +132,8 @@ public class PlayerLocomotion : MonoBehaviour
 
         if (isGrounded)
         {
+            shortHopping = false;
+            isJumping = false;
             animator.SetBool("IsGrounded", true);
         }
         else
@@ -173,6 +177,8 @@ public class PlayerLocomotion : MonoBehaviour
                 jumpTimer += Time.deltaTime;
             }
 
+            isJumping = true;
+
             if (jumpTimer > jumpSquatTime && isJumping && isGrounded)
             {
                 animator.SetTrigger("Jump");
@@ -201,13 +207,15 @@ public class PlayerLocomotion : MonoBehaviour
             if (jumpTimer <= jumpSquatTime)
             {
                 jumpTimer = 0;
-                isJumping = false;
+                isJumping = true;
                 timeToSmallJump = true;
+                shortHopping = true;
             }
             else
             {
                 timeToSmallJump = false;
                 timeToBigJump = false;
+                shortHopping = false;
             }
         }
 
@@ -221,6 +229,8 @@ public class PlayerLocomotion : MonoBehaviour
         else if (timeToSmallJump && currJumps == 2)
         {
             timeToSmallJump = false;
+            shortHopping = true;
+            isJumping = true;
             currJumps--;
             jumpTimer = 0;
             Jump(smallJump);
@@ -285,6 +295,8 @@ public class PlayerLocomotion : MonoBehaviour
     {
         if (jumpForce == bigJump)
             StartCoroutine(nameof(JumpSquat));
+        else if (jumpForce == smallJump)
+            shortHopping = true;
 
         rb.velocity = new Vector2(rb.velocity.x, jumpForce);
 

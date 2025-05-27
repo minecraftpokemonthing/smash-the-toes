@@ -54,6 +54,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   animator: {fileID: 4222259406008177363}
+  spawnPoint: {fileID: 0}
+  deadPoint: {fileID: 0}
   playerInput: {fileID: 368026324700789371}
   rb: {fileID: 2929902684854330633}
   speed: 10
@@ -65,7 +67,7 @@ MonoBehaviour:
   jumpMultiplier: 0
   fastFallRange: 0.3
   firstJumpForce: 20
-  secondJumpForce: 20
+  secondJumpForce: 25
   percentage: 0
   weight: 98
   decaySpeed: 3
@@ -78,12 +80,14 @@ MonoBehaviour:
   bufferTime: 0.2
   checkGround: {fileID: 6770855869907409590}
   checkSphereTransform: {fileID: 960536992310218088}
+  isJumping: 0
   isGrounded: 0
   wasGrounded: 0
   timeToBigJump: 0
   facingRight: 0
   timeToSmallJump: 0
   wasHit: 0
+  shortHopping: 0
   onPlatform: 0
   currPlatformShouldBeEnabled: 0
   canContiueTimer: 0
@@ -204,9 +208,9 @@ MonoBehaviour:
   jab: {fileID: 11400000, guid: 76893d3f3440a4e16af6c05790029108, type: 2}
   neutralSpecial: {fileID: 11400000, guid: 96caf7413252046339c93fb619efdfaf, type: 2}
   animator: {fileID: 4222259406008177363}
+  currAttack: {fileID: 0}
   facingRight: 0
   finalDamage: 0
-  staleQueue: []
   exclamationMark: {fileID: 7928145303002316505}
 --- !u!114 &254282472553400837
 MonoBehaviour:
@@ -356,7 +360,7 @@ MonoBehaviour:
   playerLocomotion: {fileID: 7297020226524247394}
   offGroundTimer: 0
   offGroundButCanJump: 1
-  offGroundMaxTime: 0.2
+  offGroundMaxTime: 1e+12
 --- !u!50 &3607727753023976637
 Rigidbody2D:
   serializedVersion: 4
