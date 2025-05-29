@@ -75,10 +75,14 @@ MonoBehaviour:
   fastFallGravityScale: 2.25
   bonusGrav: 20
   initSpeed: 0
-  runSpeed: 14
+  runSpeed: 20
   duration: 0.33
-  bufferTime: 0.2
+  bufferMax: 0.15
+  bufferTimer: 0
+  bufferRange: 0.5
+  maxKnockback: 0
   checkGround: {fileID: 6770855869907409590}
+  penguinPrefab: {fileID: 8226273213285479061}
   checkSphereTransform: {fileID: 960536992310218088}
   isJumping: 0
   isGrounded: 0
@@ -91,6 +95,8 @@ MonoBehaviour:
   onPlatform: 0
   currPlatformShouldBeEnabled: 0
   canContiueTimer: 0
+  bufferedFastFall: 0
+  canMove: 1
   currJumps: 0
   currPlatform: {fileID: 0}
   hitVector: {x: 0, y: 0}
@@ -212,6 +218,9 @@ MonoBehaviour:
   facingRight: 0
   finalDamage: 0
   exclamationMark: {fileID: 7928145303002316505}
+  bufferTimer: 0
+  maxBufferTime: 0.15
+  bufferHit: 0
 --- !u!114 &254282472553400837
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -358,9 +367,6 @@ MonoBehaviour:
   farts: 6
   quantummechanics: 1
   playerLocomotion: {fileID: 7297020226524247394}
-  offGroundTimer: 0
-  offGroundButCanJump: 1
-  offGroundMaxTime: 1e+12
 --- !u!50 &3607727753023976637
 Rigidbody2D:
   serializedVersion: 4

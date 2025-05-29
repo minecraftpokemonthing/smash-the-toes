@@ -74,7 +74,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0.63795877, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -97,6 +97,7 @@ GameObject:
   - component: {fileID: 9149962236134804420}
   - component: {fileID: 4940321672794242747}
   - component: {fileID: 5250452967927704083}
+  - component: {fileID: 5450219989593267022}
   m_Layer: 0
   m_Name: FarRange
   m_TagString: Hitbox
@@ -232,6 +233,19 @@ MonoBehaviour:
   knockbackFormula: 0
   decayRate: 3
   finalDamage: 0
+--- !u!114 &5450219989593267022
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3340063234980627574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 72082ed711adf49e9b5fd3861ebcacb9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  detectHit: {fileID: 5250452967927704083}
 --- !u!1 &3671242845343083089
 GameObject:
   m_ObjectHideFlags: 0
@@ -312,7 +326,7 @@ MonoBehaviour:
   baseKnockback: 0
   knockbackScaling: 0
   cooldown: 0
-  startUp: 0
+  startUp: 0.3
   hitboxSize: {x: 0, y: 0}
   offset: {x: 0, y: 0}
   hitboxPrefab: {fileID: 0}
@@ -688,7 +702,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.89986145, g: 1, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -772,7 +786,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 7482667652216324306, guid: 311925a002f4447b3a28927169b83ea6, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 1, g: 0, b: 0, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0

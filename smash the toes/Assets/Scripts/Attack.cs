@@ -20,10 +20,20 @@ public class Attack : MonoBehaviour
     Vector3 hitboxPos;
     GameObject hitbox;
     InitializeHitbox initializeHitbox;
+    public float bufferTimer;
+    public float maxBufferTime;
+    InputAction jabAction;
+    InputAction neutralSpecialAction;
+    InputAction currAction;
+    public bool bufferHit;
+    AttackData currBufferAttack;
+
 
     // Start is called before the first frame update
     void Start()
     {
+        jabAction = playerInput.actions["Jab"];
+        neutralSpecialAction = playerInput.actions["Neutral Special"];
         playerLocomotion = GetComponent<PlayerLocomotion>();
     }
 
@@ -37,17 +47,68 @@ public class Attack : MonoBehaviour
             facingRight = moveInput > 0;
         }
 
-        if (playerInput.actions["Jab"].triggered)
+        if (jabAction.triggered)
         {
+            currAction = jabAction;
             currAttack = jab;
             PerformAttack();
             playerLocomotion.speed = 0;
         }
-        else if (playerInput.actions["Neutral Special"].triggered)
+        else if (neutralSpecialAction.triggered)
         {
+            currAction = neutralSpecialAction;
             currAttack = neutralSpecial;
             PerformAttack();
             playerLocomotion.speed /= 5;
+        }
+
+        if (!canAttack)
+        {
+            if (jabAction.triggered)
+            {
+                currBufferAttack = jab;
+                bufferHit = true;
+                bufferTimer = maxBufferTime;
+            }
+            else if (neutralSpecialAction.triggered)
+            {
+                currBufferAttack = neutralSpecial;
+                bufferHit = true;
+                bufferTimer = maxBufferTime;
+            }
+        }
+
+        if (bufferHit)
+            bufferTimer -= Time.deltaTime;
+
+        if (bufferTimer <= 0)
+        {
+            bufferHit = false;
+            bufferTimer = maxBufferTime;
+            currBufferAttack = null;
+        }
+
+        if (canAttack)
+        {
+            if (currBufferAttack != null)
+            {
+                if (currBufferAttack == jab)
+                {
+                    currAction = jabAction;
+                    currAttack = jab;
+                    PerformAttack();
+                    playerLocomotion.speed = 0;
+                }
+                else if (currBufferAttack == neutralSpecial)
+                {
+                    currAction = neutralSpecialAction;
+                    currAttack = neutralSpecial;
+                    PerformAttack();
+                    playerLocomotion.speed /= 5;
+                }
+
+                currBufferAttack = null;
+            }
         }
     }
 
@@ -61,13 +122,16 @@ public class Attack : MonoBehaviour
         if (canAttack)
         {
             canAttack = false;
-
-            yield return new WaitForSeconds(currAttack.hitboxPrefab.GetComponent<InitializeHitbox>().startUp);
+            playerLocomotion.canMove = false;
+            playerLocomotion.rb.velocity = new Vector2(0, playerLocomotion.rb.velocity.y);
+            playerLocomotion.rb.isKinematic = true;
 
             hitboxPos = new Vector3(
             (facingRight ? 1 : -1) * currAttack.offset.x,
             currAttack.offset.y,
             0);
+
+            yield return new WaitForSeconds(currAttack.hitboxPrefab.GetComponent<InitializeHitbox>().startUp);
 
             hitbox = Instantiate(currAttack.hitboxPrefab, transform.position + hitboxPos, Quaternion.identity, this.transform);
 
@@ -84,6 +148,8 @@ public class Attack : MonoBehaviour
 
             yield return new WaitForSeconds(currAttack.activeTime);
 
+            playerLocomotion.canMove = true;
+            playerLocomotion.rb.isKinematic = false;
             Destroy(hitbox);
             exclamationMark.SetActive(false);
 

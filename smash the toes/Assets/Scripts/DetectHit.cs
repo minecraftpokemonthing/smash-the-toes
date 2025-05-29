@@ -62,9 +62,8 @@ public class DetectHit : MonoBehaviour
             {
                 for (int i = 0; i < staleQueue.FindAll(n => n == attackData).Count; i++)
                 {
-                    if (i < staleQueue.Count)
+                    if (i < staleQueue.Count && i != 9)
                     {
-                        Debug.Log(multipliers[i]);
                         grandStaleMultiplier *= multipliers[i];
                     }
                 }

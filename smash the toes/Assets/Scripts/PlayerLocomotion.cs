@@ -18,6 +18,8 @@ public class PlayerLocomotion : MonoBehaviour
     public PlayerInput playerInput;
     public Rigidbody2D rb;
 
+    CapsuleCollider2D otherPlayer;
+
     public RaycastHit2D platform;
 
     public float speed = 5f;
@@ -39,15 +41,20 @@ public class PlayerLocomotion : MonoBehaviour
     public float initSpeed;
     public float runSpeed = 14f;
     public float duration = .33f;
-    public float bufferTime = .2f;
     float moveInput;
     float runElapsed;
     float stopElapsed;
     float runT;
     float stopT;
     float t;
+    public float bufferMax = .3f;
+    public float bufferTimer = 0;
+    public float bufferRange;
+    public float maxKnockback;
 
     public CheckGround checkGround;
+
+    public GameObject penguinPrefab;
 
     public Transform checkSphereTransform;
 
@@ -63,6 +70,8 @@ public class PlayerLocomotion : MonoBehaviour
     public bool currPlatformShouldBeEnabled;
     bool dropDownPlatform;
     public bool canContiueTimer;
+    public bool bufferedFastFall;
+    public bool canMove = true;
 
     int maxJumps = 2;
     public int currJumps;
@@ -94,7 +103,8 @@ public class PlayerLocomotion : MonoBehaviour
     {
         platform = Physics2D.Raycast(transform.position, Vector2.up, 1.1f, LayerMask.GetMask("Platform"));
 
-        moveInput = playerInput.actions["Move"].ReadValue<float>();
+        if (canMove)
+            moveInput = playerInput.actions["Move"].ReadValue<float>();
 
         if (transform.position.y < deadPoint.position.y)
         {
@@ -103,10 +113,13 @@ public class PlayerLocomotion : MonoBehaviour
             percentage = 0;
         }
 
-        if (Mathf.Abs(moveInput) > 0.01f)
+        if (Mathf.Abs(moveInput) > 0.2f)
         {
             facingRight = moveInput > 0;
         }
+
+        if (Mathf.Abs(moveInput) < 0.2f)
+            moveInput = 0f;
 
         if (rb.velocity.x != 0)
         {
@@ -116,7 +129,7 @@ public class PlayerLocomotion : MonoBehaviour
         {
             animator.SetBool("NotMoving", true);
         }
-    
+
         if (platform)
         {
             if (checkSphereTransform.position.y < platform.transform.position.y)
@@ -157,11 +170,6 @@ public class PlayerLocomotion : MonoBehaviour
             }
         }
 
-        if (jump.IsPressed() && checkGround.offGroundButCanJump || playerInput.actions["Jump"].triggered && checkGround.offGroundButCanJump)
-        {
-            Jump(secondJumpForce);
-        }
-
         if (rb.velocity.y < Mathf.Abs(.2f) && !isGrounded)
         {
             canContiueTimer = false;
@@ -185,7 +193,8 @@ public class PlayerLocomotion : MonoBehaviour
                 isJumping = false;
                 timeToBigJump = true;
                 jumpTimer = 0;
-            } else
+            }
+            else
             {
                 timeToBigJump = false;
             }
@@ -246,12 +255,40 @@ public class PlayerLocomotion : MonoBehaviour
             StartCoroutine(DisablePlatformCollision());
         }
 
+        if (playerInput.actions["Fast Fall"].triggered)
+        {
+            bufferedFastFall = true;
+            bufferTimer = bufferMax;
+        }
+
+        if (bufferedFastFall)
+        {
+            bufferTimer -= Time.deltaTime;
+            if (bufferTimer <= 0)
+            {
+                bufferedFastFall = false;
+            }
+        }
+
+        if (isGrounded)
+        {
+            bufferTimer = bufferMax;
+            bufferedFastFall = false;
+        }
+
         if (!isGrounded && rb.velocity.y < Mathf.Abs(fastFallRange) || !isGrounded && rb.velocity.y < 0)
         {
             if (playerInput.actions["Fast Fall"].triggered)
             {
+                bufferedFastFall = false;
                 rb.velocity = new Vector2(rb.velocity.x, fastFallGravityScale * -9.81f);
             }
+        }
+
+        if (bufferedFastFall && rb.velocity.y < Mathf.Abs(bufferRange))
+        {
+            Debug.Log("bufferfast fall lol");
+            FastFall();
         }
 
         if (!isGrounded)
@@ -260,6 +297,15 @@ public class PlayerLocomotion : MonoBehaviour
             vel.y -= bonusGrav * Time.deltaTime;
 
             rb.velocity = vel;
+
+            onPlatform = false;
+            canContiueTimer = false;
+
+            if (currJumps > 0 && playerInput.actions["Jump"].triggered)
+            {
+                Jump(secondJumpForce);
+                currJumps = 0;
+            }
         }
 
         if (moveInput > .5f || moveInput < -.5f)
@@ -271,7 +317,8 @@ public class PlayerLocomotion : MonoBehaviour
 
             if (runSpeed - speed < .2f)
                 speed = runSpeed;
-        } else
+        }
+        else
         {
             stopElapsed = 0;
             stopElapsed += Time.deltaTime;
@@ -280,6 +327,12 @@ public class PlayerLocomotion : MonoBehaviour
 
             if (speed - initSpeed < .2f)
                 speed = initSpeed;
+        }
+
+        if (otherPlayer != null)
+        {
+            if (isGrounded || otherPlayer.gameObject.GetComponent<PlayerLocomotion>().isGrounded)
+                Physics2D.IgnoreCollision(this.GetComponent<CapsuleCollider2D>(), otherPlayer, false);
         }
     }
 
@@ -321,20 +374,35 @@ public class PlayerLocomotion : MonoBehaviour
 
     public void ApplyKnockback(Vector2 knockback)
     {
-        StopAllCoroutines(); // stop any previous decay
+        // Stop any existing knockback handling
+        StopAllCoroutines();
+
+        animator.ResetTrigger("Stun");
+
+        // Trigger stun animation immediately
+        animator.CrossFade("stun", 0f);
+        animator.SetBool("NotMoving", false);
+
+        if (!isGrounded)
+        {
+            rb.isKinematic = true;
+        }
+
+        // Start new coroutine for knockback
         StartCoroutine(HandleKnockback(knockback));
     }
 
     private IEnumerator HandleKnockback(Vector2 knockback)
     {
+        yield return new WaitForSeconds(.2f);
+
+        rb.isKinematic = false;
+
         wasHit = true;
-        rb.velocity = new Vector2(knockback.x, rb.velocity.y );
-        /*
-        if (!isGrounded)
-        {
-            rb.velocity = new Vector2(rb.velocity.x, 0);
-        }
-        */
+
+        // Apply knockback with controlled velocity
+        rb.velocity = new Vector2(knockback.x, Mathf.Clamp(rb.velocity.y, -firstJumpForce / 3, firstJumpForce / 3));
+
         t = 0f;
         startVel = rb.velocity;
 
@@ -342,6 +410,13 @@ public class PlayerLocomotion : MonoBehaviour
         {
             t += Time.deltaTime * decaySpeed;
             rb.velocity = Vector2.Lerp(startVel, new Vector2(0, rb.velocity.y), t);
+
+            // Additional safety check to prevent excessive velocities
+            rb.velocity = new Vector2(
+                rb.velocity.x,
+                Mathf.Clamp(rb.velocity.y, -firstJumpForce / 3, firstJumpForce / 3)
+            );
+
             yield return null;
         }
 
@@ -352,6 +427,8 @@ public class PlayerLocomotion : MonoBehaviour
         {
             currJumps = 2;
         }
+
+        penguinPrefab.transform.localPosition = new Vector2(0, .8f);
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -368,5 +445,21 @@ public class PlayerLocomotion : MonoBehaviour
             rb.AddForce(Vector2.left * 10, ForceMode2D.Impulse);
         }
         */
+    }
+
+    void FastFall()
+    {
+        rb.velocity = new Vector2(rb.velocity.x, fastFallGravityScale * -9.81f);
+    }
+
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        if (collision.gameObject.layer == 8)
+        {
+            otherPlayer = collision.gameObject.GetComponent<CapsuleCollider2D>();
+
+            if (!isGrounded || !otherPlayer.gameObject.GetComponent<PlayerLocomotion>().isGrounded)
+                Physics2D.IgnoreCollision(this.GetComponent<CapsuleCollider2D>(), otherPlayer, true);
+        }
     }
 }

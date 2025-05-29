@@ -10,10 +10,6 @@ public class CheckGround : MonoBehaviour
     public int quantummechanics = 1;
     public PlayerLocomotion playerLocomotion;
     PlayerInput playerInput;
-    public float offGroundTimer;
-    public bool offGroundButCanJump = true;
-    public float offGroundMaxTime = .2f;
-    bool startTimer;
 
     //private void Update()
     //{
@@ -31,21 +27,7 @@ public class CheckGround : MonoBehaviour
 
     private void Update()
     {
-        if (startTimer)
-        {
-            offGroundTimer += Time.deltaTime;
-        }
-
-        if (offGroundTimer < offGroundMaxTime && startTimer)
-        {
-            offGroundButCanJump = true;
-        }
-        else
-        {
-            startTimer = false;
-            offGroundButCanJump = false;
-            offGroundTimer = 0;
-        }
+        
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -56,9 +38,6 @@ public class CheckGround : MonoBehaviour
             playerLocomotion.currJumps = 2;
 
             playerLocomotion.timeToSmallJump = false;
-
-            offGroundButCanJump = false;
-            startTimer = false;
         }
         else if (collision.gameObject.layer == 7 && transform.parent.position.y - 1 > collision.transform.position.y)
         {
@@ -70,9 +49,6 @@ public class CheckGround : MonoBehaviour
 
             playerLocomotion.timeToSmallJump = false;
             playerLocomotion.timeToBigJump = false;
-
-            offGroundButCanJump = false;
-            startTimer = false;
 
             if (playerInput.actions["Fast Fall"].triggered)
             {
@@ -93,9 +69,6 @@ public class CheckGround : MonoBehaviour
 
             playerLocomotion.timeToSmallJump = false;
             playerLocomotion.timeToBigJump = false;
-
-            offGroundButCanJump = false;
-            startTimer = false;
         }
     }
 
@@ -103,7 +76,6 @@ public class CheckGround : MonoBehaviour
     {
         if (collision.gameObject.layer == 7 && playerLocomotion.rb.velocity.y < 0)
         {
-            startTimer = true;
             playerLocomotion.isGrounded = false;
         }
         else if (collision.gameObject.layer == 6)

@@ -12,7 +12,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 639f46611cee64c9f8128c545215c601, type: 3}
   m_Name: Gun
   m_EditorClassIdentifier: 
-  activeTime: 0.5
+  activeTime: 0.05
   cooldown: 0.5
   startUp: 1
   damage: 41.69
